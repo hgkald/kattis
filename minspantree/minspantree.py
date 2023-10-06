@@ -6,7 +6,7 @@ from functools import total_ordering
 class Graph:
     def __init__(self):
         self.nodes = {}
-        self.edges = []
+        self.edges = {}
 
     def node(self, val):
         return self.nodes[int(val)]
@@ -15,7 +15,8 @@ class Graph:
         self.nodes[node.val] = node
 
     def add_edge(self, edge):
-        self.edges.append(edge)
+        key = frozenset((edge.node1.val, edge.node2.val))
+        self.edges[key] = edge
 
 class Node:
     def __init__(self, val):
@@ -59,7 +60,6 @@ class ComparableItem:
 def prim(g): 
     q = queue.PriorityQueue()
     parents = {}
-    cost = 0
 
     some_node = random.choice(list(g.nodes.values()))
     q.put(ComparableItem(0, (None, some_node)))
@@ -70,11 +70,9 @@ def prim(g):
             parents[node] = parent
             for edge in node.edges: 
                 child = edge.other_node(node)
-                #q.put(ComparableItem(edge.weight, (node, child)))
                 q.put(ComparableItem(edge.weight, (node, child)))
-                cost += edge.weight
 
-    return (cost, parents)
+    return parents
 
 def __main__(): 
     vals = input().split()
@@ -95,19 +93,27 @@ def __main__():
                 node2 = g.nodes[n2]
 
             edge = Edge(node1, node2, w)
+            key = (node1.val, node2.val)
             g.add_edge(edge)
             node1.add_edge(edge)
             node2.add_edge(edge)
 
         if len(g.edges) > 0: 
-            cost, parents = prim(g)
-            print(cost)
-            
+            parents = prim(g)
+            cost = 0
+            edges = [] 
             for node in parents: 
                 if parents[node]:
-                    child = parents[node]
-                    print(node.val, child.val)
-            
+                    parent = parents[node]
+                    cost += g.edges[frozenset((parent.val, node.val))].weight
+                    edge = [parent.val, node.val]
+                    edge.sort()
+                    edges.append(edge)
+            print(cost)
+
+            edges.sort()
+            for e in edges: 
+                print(e[0], e[1])
         else: 
             print("Impossible")
         vals = input().split()
