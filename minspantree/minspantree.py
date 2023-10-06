@@ -2,6 +2,8 @@ import sys
 import queue
 import random 
 from functools import total_ordering 
+import heapq
+import cProfile 
 
 class Graph:
     def __init__(self):
@@ -57,8 +59,24 @@ class ComparableItem:
         return self.priority == other.priority
 
 
+class MyQueue:
+    def __init__(self):
+        self.items = []
+
+    def empty(self):
+        return len(self.items) == 0
+
+    def get(self):
+        rv = heapq.heappop(self.items)
+        return rv
+    
+    def put(self, item):
+        heapq.heappush(self.items, item)
+
+
 def prim(g): 
-    q = queue.PriorityQueue()
+    #q = queue.PriorityQueue()
+    q = MyQueue()
     parents = {}
 
     some_node = random.choice(list(g.nodes.values()))
@@ -66,18 +84,21 @@ def prim(g):
 
     while not q.empty(): 
         (parent, node) = q.get().item
-        if node not in parents: 
+        if node not in parents:
             parents[node] = parent
             for edge in node.edges: 
                 child = edge.other_node(node)
-                q.put(ComparableItem(edge.weight, (node, child)))
+                if child not in parents: 
+                    q.put(ComparableItem(edge.weight, (node, child)))
 
     return parents
 
 def __main__(): 
     vals = input().split()
-    while vals != ['0','0']: 
+    while vals != ['0','0']:
         g = Graph()
+        n = int(vals[0])
+        m = int(vals[1])
         for i in range(int(vals[1])): 
             [n1, n2, w] = [int(val) for val in input().split()]
             if n1 not in g.nodes.keys(): 
@@ -93,15 +114,19 @@ def __main__():
                 node2 = g.nodes[n2]
 
             edge = Edge(node1, node2, w)
-            key = (node1.val, node2.val)
             g.add_edge(edge)
             node1.add_edge(edge)
             node2.add_edge(edge)
 
         if len(g.edges) > 0: 
             parents = prim(g)
-            cost = 0
+            nodes_reached = len(parents)
+            if nodes_reached < n: 
+                print("Impossible")
+                continue
+
             edges = [] 
+            cost = 0
             for node in parents: 
                 if parents[node]:
                     parent = parents[node]
@@ -119,6 +144,7 @@ def __main__():
         vals = input().split()
 
 
-__main__()
+cProfile.run('__main__()')
+#__main__()
 
 
