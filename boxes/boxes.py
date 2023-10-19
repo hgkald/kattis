@@ -1,22 +1,30 @@
-from collections import deque 
+from collections import deque
 import sys
 
 class Node: 
     def __init__(self, value, parent): 
         self.id = value 
-        self.parent = parent
+        #self.parent = parent
         self.children = []
 
 class Forest:
     def __init__(self): 
         self.root = Node(0, None) 
-        self.nodes = {0: self.root} #{nodeid: node} 
+        self.nodes = {0: self.root}
 
     def add_node(self, parentid, nodeid):
         #print("Adding node. Parent:", parentid, "Child:", nodeid)
-        parent = self.nodes[parentid] 
-        node = Node(nodeid, parent) 
-        self.nodes[nodeid] = node
+        if parentid not in self.nodes: 
+            parent = Node(parentid, None) 
+            self.nodes[parentid] = parent
+        else: 
+            parent = self.nodes[parentid] 
+
+        if nodeid not in self.nodes: 
+            node = Node(nodeid, parent)
+            self.nodes[nodeid] = node
+        else: 
+            node = self.nodes[nodeid]
         parent.children.append(node)
         
         #print(self.nodes)
@@ -43,13 +51,12 @@ def main():
     q = int(sys.stdin.readline())
     for i in range(q): 
         line = [int(x) for x in sys.stdin.readline().split()]
+
         visited = set()
         for j in line[1:]: 
-            if j not in forest.nodes: 
-                print("fail")
-            else: 
-                forest.count_boxes(forest.nodes[j], visited)
+            forest.count_boxes(forest.nodes[j], visited)
         print(len(visited))
+
 
 if __name__=='__main__': 
     main()
