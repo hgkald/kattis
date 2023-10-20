@@ -36,13 +36,14 @@ def main():
     time = 0 
     janeRead = False 
     while not janeRead:
-        if not newBooks.empty(): 
+        while not newBooks.empty(): 
             nextGiftTime = newBooks.first()[0]
             if nextGiftTime <= time:
                 books.push(newBooks.pop()[1])
+            else:
+                break
 
         nextBook, numPages = books.pop()
-        print(nextBook, numPages)
         time += numPages 
         if nextBook=="Jane Eyre": 
             janeRead = True 
